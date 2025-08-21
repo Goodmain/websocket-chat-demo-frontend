@@ -1,46 +1,21 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
+import { post } from './api';
+import { useTypingIndicator } from './useTypingIndicator';
 
-const MessageInput = () => {
+const MessageInput = ({ username }) => {
   const [text, setText] = useState('');
-  const typingTimeout = useRef(null);
-  const username = 'User1';
-
-  const API_URL = 'http://localhost:8081';
-
-  const sendTypingEvent = async (event) => {
-    await fetch(`${API_URL}/api/typing`, {
-      method: 'POST',
-      body: JSON.stringify({ user_name: username }),
-      headers: { 'Content-Type': 'application/json' },
-    });
-  };
-
-  const sendStoppedTypingEvent = async () => {
-    await fetch(`${API_URL}/api/stopped-typing`, {
-      method: 'POST',
-      body: JSON.stringify({ user_name: username }),
-      headers: { 'Content-Type': 'application/json' },
-    });
-  };
+  const { handleTyping, stopTyping } = useTypingIndicator(username);
 
   const handleChange = (e) => {
     setText(e.target.value);
-    sendTypingEvent();
-
-    if (typingTimeout.current) clearTimeout(typingTimeout.current);
-    typingTimeout.current = setTimeout(() => {
-      sendStoppedTypingEvent();
-    }, 1000);
+    handleTyping();
   };
 
   const sendMessage = async () => {
-    await fetch(`${API_URL}/api/messages`, {
-      method: 'POST',
-      body: JSON.stringify({ user_name: username, text }),
-      headers: { 'Content-Type': 'application/json' },
-    });
+    if (!text.trim()) return;
+    await post('/api/messages', { user_name: username, text });
     setText('');
-    sendStoppedTypingEvent();
+    stopTyping();
   };
 
   return (

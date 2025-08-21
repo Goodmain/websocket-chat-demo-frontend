@@ -29,11 +29,13 @@ const App = () => {
     };
   }, []);
 
+  const username = 'User1';
+
   return (
     <div>
       <ChatWindow messages={messages} />
       <TypingIndicator users={typingUsers} />
-      <MessageInput />
+      <MessageInput username={username} />
     </div>
   );
 };
